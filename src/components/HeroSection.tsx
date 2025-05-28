@@ -32,30 +32,128 @@ const HeroSection = ({
                 {ctaText} <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </div>
+
+            {/* Endorsements */}
+            <div className="pt-8 border-t border-zinc-200 dark:border-zinc-800">
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-4">
+                Trusted by innovative teams at:
+              </p>
+              <div className="flex flex-wrap items-center gap-6">
+                <div className="flex items-center space-x-2">
+                  <div className="w-8 h-8 bg-zinc-200 dark:bg-zinc-700 rounded-full flex items-center justify-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-zinc-700 dark:text-zinc-300"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"></path>
+                    </svg>
+                  </div>
+                  <span className="font-medium text-zinc-800 dark:text-zinc-200">
+                    Acme Inc
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-8 h-8 bg-zinc-200 dark:bg-zinc-700 rounded-full flex items-center justify-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-zinc-700 dark:text-zinc-300"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                    </svg>
+                  </div>
+                  <span className="font-medium text-zinc-800 dark:text-zinc-200">
+                    StackAI
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-8 h-8 bg-zinc-200 dark:bg-zinc-700 rounded-full flex items-center justify-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-zinc-700 dark:text-zinc-300"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                      <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                      <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                    </svg>
+                  </div>
+                  <span className="font-medium text-zinc-800 dark:text-zinc-200">
+                    HappyTech
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="flex justify-center lg:justify-end">
-            <div className="relative w-full max-w-[600px] h-[400px] rounded-xl bg-zinc-100 dark:bg-zinc-800 overflow-hidden flex items-center justify-center border border-zinc-200 dark:border-zinc-700 shadow-lg">
-              {/* Placeholder for animated GIF/video */}
-              <div className="text-zinc-400 dark:text-zinc-500 text-center px-8">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-16 h-16 mx-auto mb-4"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
-                  />
-                </svg>
-                <p className="text-lg font-medium">Mind Map Animation</p>
-                <p className="mt-2">
-                  Visualize how your meetings transform into organized mind maps
-                </p>
+            <div className="relative w-full max-w-[600px] h-[400px] rounded-xl bg-gradient-to-br from-indigo-50 via-white to-indigo-50 dark:from-indigo-900/20 dark:via-zinc-800 dark:to-indigo-900/20 overflow-hidden flex items-center justify-center border border-indigo-100 dark:border-indigo-900/30 shadow-xl">
+              {/* Premium Mockup */}
+              <div className="w-full h-full p-6 flex items-center justify-center">
+                <div className="w-full max-w-md bg-white dark:bg-zinc-800 rounded-lg shadow-2xl overflow-hidden border border-zinc-200 dark:border-zinc-700">
+                  <div className="p-4 bg-indigo-500 text-white flex justify-between items-center">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 bg-red-400 rounded-full"></div>
+                      <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                      <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                    </div>
+                    <div className="text-sm font-medium">
+                      Transcendence Meeting
+                    </div>
+                    <div></div>
+                  </div>
+                  <div className="p-4 flex flex-col items-center justify-center space-y-4">
+                    <div className="w-20 h-20 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-10 w-10 text-indigo-500"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polygon points="10 8 16 12 10 16 10 8"></polygon>
+                      </svg>
+                    </div>
+                    <span className="text-lg font-medium text-zinc-800 dark:text-zinc-200">
+                      Ready to Record
+                    </span>
+                    <span className="text-sm text-zinc-500 dark:text-zinc-400">
+                      Click to start your meeting
+                    </span>
+                  </div>
+                  <div className="p-4 border-t border-zinc-200 dark:border-zinc-700 flex justify-between items-center">
+                    <div className="flex items-center space-x-2">
+                      <span className="inline-block w-2 h-2 bg-green-500 rounded-full"></span>
+                      <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                        AI Ready
+                      </span>
+                    </div>
+                    <div className="text-xs text-zinc-500 dark:text-zinc-400">
+                      00:00:00
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
