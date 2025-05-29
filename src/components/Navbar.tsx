@@ -52,12 +52,14 @@ const Navbar = () => {
 
         {/* Right side - CTA and theme toggle */}
         <div className="hidden md:flex items-center space-x-4">
-          <Button
-            variant="default"
-            className="bg-indigo-500 hover:bg-indigo-600 text-white"
-          >
-            Start Recording
-          </Button>
+          <Link href="/app">
+            <Button
+              variant="default"
+              className="bg-indigo-500 hover:bg-indigo-600 text-white"
+            >
+              Start Recording
+            </Button>
+          </Link>
           <button
             onClick={toggleTheme}
             className="p-2 rounded-md text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
@@ -112,13 +114,15 @@ const Navbar = () => {
             >
               Pricing
             </Link>
-            <Button
-              variant="default"
-              className="bg-indigo-500 hover:bg-indigo-600 text-white w-full"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Start Recording
-            </Button>
+            <Link href="/app">
+              <Button
+                variant="default"
+                className="bg-indigo-500 hover:bg-indigo-600 text-white w-full"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Start Recording
+              </Button>
+            </Link>
           </div>
         </div>
       )}

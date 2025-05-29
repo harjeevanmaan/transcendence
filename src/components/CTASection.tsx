@@ -1,6 +1,7 @@
 "use client"; // ← must be first line
 
 import React from "react";
+import Link from "next/link";
 import { Button } from "./ui/button";
 
 interface CTASectionProps {
@@ -29,13 +30,15 @@ const CTASection = ({
                 {description}
               </p>
               <div>
-                <Button
-                  onClick={onButtonClick}
-                  size="lg"
-                  className="bg-white text-indigo-600 hover:bg-white/90 hover:text-indigo-700 font-medium px-8 py-6 h-auto text-lg shadow-lg"
-                >
-                  {buttonText}
-                </Button>
+                <Link href="/app">
+                  <Button
+                    onClick={onButtonClick}
+                    size="lg"
+                    className="bg-white text-indigo-600 hover:bg-white/90 hover:text-indigo-700 font-medium px-8 py-6 h-auto text-lg shadow-lg"
+                  >
+                    {buttonText}
+                  </Button>
+                </Link>
               </div>
             </div>
             <div className="hidden md:flex items-center justify-center p-10 relative overflow-hidden">

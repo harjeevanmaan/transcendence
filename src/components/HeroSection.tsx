@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "./ui/button";
 import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 interface HeroSectionProps {
   headline?: string;
@@ -25,12 +26,14 @@ const HeroSection = ({
               {subheadline}
             </p>
             <div className="pt-4">
-              <Button
-                size="lg"
-                className="bg-indigo-500 hover:bg-indigo-600 text-white"
-              >
-                {ctaText} <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+              <Link href="/app">
+                <Button
+                  size="lg"
+                  className="bg-indigo-500 hover:bg-indigo-600 text-white"
+                >
+                  {ctaText} <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
             </div>
 
             {/* Endorsements */}
