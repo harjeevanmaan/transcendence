@@ -183,7 +183,7 @@ export default function AppPage() {
     recognition.lang = "en-US";
 
     // Handle results
-    recognition.onresult = (event) => {
+    recognition.onresult = (event: any) => {
       if (!isRecordingRef.current) return;
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -195,7 +195,7 @@ export default function AppPage() {
     };
 
     // Handle errors
-    recognition.onerror = (event) => {
+    recognition.onerror = (event: any) => {
       console.error("Speech recognition error", event.error);
       if (event.error === "not-allowed") {
         alert(
