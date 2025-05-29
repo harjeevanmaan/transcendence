@@ -170,9 +170,11 @@ export default function AppPage() {
     }
 
     // Create speech recognition instance
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
+    // Use type assertion to avoid TypeScript errors during build
+    const SpeechRecognitionAPI =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
+    const recognition = new SpeechRecognitionAPI();
     recognitionRef.current = recognition;
 
     // Configure recognition
