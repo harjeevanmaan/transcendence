@@ -50,3 +50,7 @@ node_modules/
 .git
 
 .github/
+
+venv/
+transcript.txt
+diff.*
