@@ -3,6 +3,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Play, Square, Mic } from "lucide-react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+
+// ForceGraph uses window; load dynamically to avoid SSR issues.
+const MindMapCanvas = dynamic(() => import("@/components/MindMapCanvas"), {
+  ssr: false,
+});
+import type { MindMapData } from "@/components/MindMapCanvas";
 
 export default function AppPage() {
   const [isRecording, setIsRecording] = useState(false);
@@ -11,6 +18,7 @@ export default function AppPage() {
     null,
   );
   const [transcript, setTranscript] = useState<string[]>([]);
+  const [graphData, setGraphData] = useState<MindMapData>({ nodes: [], edges: [] });
 
   // Refs for audio recording
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -264,7 +272,7 @@ export default function AppPage() {
       data.edges.forEach((e: any) =>
         console.log("edge:", e.source, "--(", e.relation || "", ")→", e.target)
       );
-      // TODO: setGraphData(data);
+      setGraphData(data);
     } catch (err) {
       console.error("🚨 backend fetch failed", err);
     }
@@ -363,7 +371,8 @@ export default function AppPage() {
       <main className="flex-1 p-6">
         <div className="w-full h-full flex">
           {/* Left side - Mind Map Area (75%) */}
-          <div className="flex-[3] flex flex-col items-center justify-center">
+          <div className="flex-[3] flex flex-col items-center justify-center w-full h-full">
+            <MindMapCanvas data={graphData} />
             {!isRecording ? (
               <div className="w-full max-w-md bg-white dark:bg-zinc-800 rounded-lg shadow-2xl overflow-hidden border border-zinc-200 dark:border-zinc-700">
                 <div className="p-8 flex flex-col items-center justify-center space-y-4">
