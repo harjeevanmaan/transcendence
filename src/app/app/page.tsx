@@ -249,7 +249,7 @@ export default function AppPage() {
   // Send transcript to backend every 15 s while recording (simple throttle)
   const sendToBackend = async (text: string) => {
     if (text.length < 200) return; // skip tiny payloads
-    console.time("⏱ round-trip");
+    const t0 = performance.now();
     try {
       const res = await fetch("/api/backend", {
         method: "POST",
@@ -257,8 +257,13 @@ export default function AppPage() {
         body: JSON.stringify({ text }),
       });
       const data = await res.json();
-      console.timeEnd("⏱ round-trip");
+      const ms = Math.round(performance.now() - t0);
+      console.log(`⏱ round-trip ${ms} ms`);
       console.log("🧩 received", data.nodes.length, "nodes /", data.edges.length, "edges");
+      data.nodes.forEach((n: any) => console.log("node:", n.id, "→", n.label));
+      data.edges.forEach((e: any) =>
+        console.log("edge:", e.source, "--(", e.relation || "", ")→", e.target)
+      );
       // TODO: setGraphData(data);
     } catch (err) {
       console.error("🚨 backend fetch failed", err);
