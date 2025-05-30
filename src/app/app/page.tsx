@@ -19,6 +19,10 @@ export default function AppPage() {
   const isRecordingRef = useRef(false);
   const recognitionRef = useRef<any>(null);
 
+  // Pump state for backend sync
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const transcriptRef = useRef<string>("");
+
   // Cleanup function for all timeouts
   useEffect(() => {
     return () => {
@@ -113,6 +117,9 @@ export default function AppPage() {
 
       // Start speech recognition
       startSpeechRecognition();
+
+      // Start backend pump
+      startBackendPump();
     } catch (error) {
       console.error("Error starting recording:", error);
       alert("Could not access microphone. Please check permissions.");
@@ -163,10 +170,11 @@ export default function AppPage() {
     timeoutsRef.current.forEach((timeout) => clearTimeout(timeout));
     timeoutsRef.current = [];
 
-    // Send final transcript to backend
-    if (transcript.length > 0) {
-      console.log("Sending final transcript to backend");
-      callBackendWithTranscript(transcript);
+    // Stop backend pump and send final payload immediately
+    stopBackendPump();
+    if (transcriptRef.current.length > 0) {
+      console.log("▶️ sending final transcript (", transcriptRef.current.length, "chars )");
+      sendToBackend(transcriptRef.current);
     }
   };
 
@@ -208,10 +216,7 @@ export default function AppPage() {
         if (event.results[i].isFinal) {
           setTranscript((prev) => {
             const newTranscript = [...prev, transcript];
-            // Call backend API with debounce when we have transcript data
-            if (newTranscript.length > 0) {
-              callBackendWithTranscript(newTranscript);
-            }
+            transcriptRef.current = newTranscript.join(" ");
             return newTranscript;
           });
         }
@@ -241,37 +246,36 @@ export default function AppPage() {
   // Debounce timer for API calls
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Function to call the backend API with transcript data
-  const callBackendWithTranscript = async (transcriptData: string[]) => {
+  // Send transcript to backend every 15 s while recording (simple throttle)
+  const sendToBackend = async (text: string) => {
+    if (text.length < 200) return; // skip tiny payloads
+    console.time("⏱ round-trip");
     try {
-      // Clear any existing debounce timer
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
+      const res = await fetch("/api/backend", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      const data = await res.json();
+      console.timeEnd("⏱ round-trip");
+      console.log("🧩 received", data.nodes.length, "nodes /", data.edges.length, "edges");
+      // TODO: setGraphData(data);
+    } catch (err) {
+      console.error("🚨 backend fetch failed", err);
+    }
+  };
 
-      // Set a new debounce timer (15 seconds)
-      debounceTimerRef.current = setTimeout(async () => {
-        console.log("Calling backend with transcript data:", transcriptData);
+  const startBackendPump = () => {
+    if (intervalRef.current) return;
+    intervalRef.current = setInterval(() => {
+      sendToBackend(transcriptRef.current);
+    }, 15000);
+  };
 
-        const response = await fetch("/api/backend", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          // Fix payload shape: send as a single string with the expected key
-          body: JSON.stringify({ text: transcriptData.join(" ") }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`Backend API error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log("Backend API response:", data);
-        return data;
-      }, 15000); // 15 second debounce
-    } catch (error) {
-      console.error("Error calling backend API:", error);
+  const stopBackendPump = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
     }
   };
 
@@ -300,10 +304,7 @@ export default function AppPage() {
         // Add the transcript line immediately to ensure it appears
         setTranscript((prev) => {
           const newTranscript = [...prev, transcriptPhrases[index]];
-          // Call backend API with debounce when we have transcript data
-          if (newTranscript.length > 0) {
-            callBackendWithTranscript(newTranscript);
-          }
+          transcriptRef.current = newTranscript.join(" ");
           return newTranscript;
         });
         index++;
