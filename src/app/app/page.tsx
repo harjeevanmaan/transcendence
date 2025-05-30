@@ -30,6 +30,11 @@ export default function AppPage() {
       // Clear all timeouts
       timeoutsRef.current.forEach((timeout) => clearTimeout(timeout));
 
+      // Clear debounce timer
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+
       // Stop media recorder if active
       if (
         mediaRecorderRef.current &&
@@ -55,6 +60,12 @@ export default function AppPage() {
       if (mediaRecorderRef.current.stream) {
         const tracks = mediaRecorderRef.current.stream.getTracks();
         tracks.forEach((track) => track.stop());
+      }
+
+      // Clear debounce timer when recording stops
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
       }
     }
   }, [isRecording]);
@@ -151,6 +162,12 @@ export default function AppPage() {
     // Clear all pending timeouts
     timeoutsRef.current.forEach((timeout) => clearTimeout(timeout));
     timeoutsRef.current = [];
+
+    // Send final transcript to backend
+    if (transcript.length > 0) {
+      console.log("Sending final transcript to backend");
+      callBackendWithTranscript(transcript);
+    }
   };
 
   // Start speech recognition
@@ -189,7 +206,14 @@ export default function AppPage() {
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const transcript = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
-          setTranscript((prev) => [...prev, transcript]);
+          setTranscript((prev) => {
+            const newTranscript = [...prev, transcript];
+            // Call backend API with debounce when we have transcript data
+            if (newTranscript.length > 0) {
+              callBackendWithTranscript(newTranscript);
+            }
+            return newTranscript;
+          });
         }
       }
     };
@@ -211,6 +235,43 @@ export default function AppPage() {
       console.error("Error starting speech recognition:", error);
       // Fall back to simulation if starting fails
       simulateTranscription();
+    }
+  };
+
+  // Debounce timer for API calls
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Function to call the backend API with transcript data
+  const callBackendWithTranscript = async (transcriptData: string[]) => {
+    try {
+      // Clear any existing debounce timer
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+
+      // Set a new debounce timer (15 seconds)
+      debounceTimerRef.current = setTimeout(async () => {
+        console.log("Calling backend with transcript data:", transcriptData);
+
+        const response = await fetch("/api/backend", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          // Fix payload shape: send as a single string with the expected key
+          body: JSON.stringify({ text: transcriptData.join(" ") }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Backend API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("Backend API response:", data);
+        return data;
+      }, 15000); // 15 second debounce
+    } catch (error) {
+      console.error("Error calling backend API:", error);
     }
   };
 
@@ -237,7 +298,14 @@ export default function AppPage() {
 
       if (index < transcriptPhrases.length) {
         // Add the transcript line immediately to ensure it appears
-        setTranscript((prev) => [...prev, transcriptPhrases[index]]);
+        setTranscript((prev) => {
+          const newTranscript = [...prev, transcriptPhrases[index]];
+          // Call backend API with debounce when we have transcript data
+          if (newTranscript.length > 0) {
+            callBackendWithTranscript(newTranscript);
+          }
+          return newTranscript;
+        });
         index++;
 
         // Continue adding lines at random intervals if still recording
