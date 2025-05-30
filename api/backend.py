@@ -72,7 +72,14 @@ def build_map(text: str) -> MindMap:
     raw = res.choices[0].message.content  # JSON string from LLM
 
     try:
-        return MindMap.model_validate_json(raw)
+        mindmap = MindMap.model_validate_json(raw)
+        preview = mindmap.model_dump()
+        print(
+            f"✅ nodes={len(preview['nodes'])} edges={len(preview['edges'])} "
+            f"example-node={preview['nodes'][0]['id'] if preview['nodes'] else 'none'}",
+            file=sys.stderr,
+        )
+        return mindmap
     except ValidationError as e:
         raise RuntimeError(f"Invalid LLM JSON: {e}\n{raw}") from e
 
