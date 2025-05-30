@@ -38,7 +38,7 @@ class MindMap(BaseModel):
 
 
 CLIENT = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-MODEL = "gpt-4o-mini"
+MODEL = "o4-mini-2025-04-16"
 # We clip to 20 000 chars (~8k tokens) as a safety guard; raise if you like.
 MAX_CHARS = 20_000
 
@@ -62,8 +62,7 @@ def build_map(text: str) -> MindMap:
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": text[:MAX_CHARS]},
         ],
-        response_format={"type": "json_object"},
-        temperature=0.2,
+        response_format={"type": "json_object"}
     )
     print(f"GPT response: {res}")
 
