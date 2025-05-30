@@ -52,5 +52,5 @@ node_modules/
 .github/
 
 venv/
-transcript.txt
+transcript*
 diff.*

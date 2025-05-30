@@ -9,6 +9,7 @@ Key points for readers unfamiliar with `BaseHTTPRequestHandler`:
 from http.server import BaseHTTPRequestHandler
 import json, os, sys
 from typing import List, Optional
+import time
 
 from pydantic import BaseModel, ValidationError
 from openai import OpenAI
@@ -56,6 +57,7 @@ SYSTEM_PROMPT = (
 def build_map(text: str) -> MindMap:
     """Call GPT and validate the returned JSON against `MindMap`."""
 
+    start = time.perf_counter()
     res = CLIENT.chat.completions.create(
         model=MODEL,
         messages=[
@@ -64,9 +66,10 @@ def build_map(text: str) -> MindMap:
         ],
         response_format={"type": "json_object"}
     )
-    print(f"GPT response: {res}")
+    elapsed_ms = round((time.perf_counter() - start) * 1000)
+    print(f"🕒  {elapsed_ms}ms", file=sys.stderr)
 
-    raw = res.choices[0].message.content  # already a JSON string
+    raw = res.choices[0].message.content  # JSON string from LLM
 
     try:
         return MindMap.model_validate_json(raw)
