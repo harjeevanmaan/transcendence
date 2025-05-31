@@ -1,6 +1,5 @@
 import React, { useRef, useEffect } from "react";
-import ForceGraph2D from "react-force-graph";
-
+import ForceGraph2D from 'react-force-graph-2d';
 export interface NodeType {
   id: string;
   label: string;
