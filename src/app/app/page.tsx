@@ -11,6 +11,14 @@ const MindMapCanvas = dynamic(() => import("@/components/MindMapCanvas"), {
 });
 import type { MindMapData } from "@/components/MindMapCanvas";
 
+// ───────────────────────────────────────────────────────────────
+// Backend routing – set this to true when you want to hit your
+// local FastAPI/Flask/Whatever running on :5001.
+const USE_LOCAL_BACKEND = true;   // ← flip to true for localhost:5001
+const BACKEND_ENDPOINT  = USE_LOCAL_BACKEND
+  ? "http://localhost:5001/api/backend"
+  : "/api/backend";                // default Next.js route
+
 export default function AppPage() {
   const [isRecording, setIsRecording] = useState(false);
   const [timer, setTimer] = useState("00:00:00");
@@ -274,8 +282,7 @@ export default function AppPage() {
     if (text.length < 50) return; // skip tiny payloads
     const t0 = performance.now();
     try {
-      const endpoint = process.env.NEXT_PUBLIC_BACKEND_URL || "/api/backend";
-      const res = await fetch(endpoint, {
+      const res = await fetch(BACKEND_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text }),
