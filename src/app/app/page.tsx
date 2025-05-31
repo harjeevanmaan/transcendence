@@ -364,7 +364,7 @@ export default function AppPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-900 flex flex-col">
+    <div className="h-screen overflow-hidden bg-white dark:bg-zinc-900 flex flex-col">
       {/* Header */}
       <header className="bg-indigo-500 text-white p-4 flex justify-between items-center">
         <div className="flex items-center space-x-2">
@@ -385,7 +385,7 @@ export default function AppPage() {
 
       {/* Main Content */}
       <main ref={mainRef} className="flex flex-1 min-h-0">
-        <div className="w-full h-full flex min-h-0">
+        <div className="w-full flex flex-1 min-h-0">
           {/* Left side - Mind Map Area (75%) */}
           <div
             ref={mapAreaRef}
