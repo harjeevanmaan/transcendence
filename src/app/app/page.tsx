@@ -424,29 +424,31 @@ export default function AppPage() {
                     </span>
                   </div>
                 </div>
-                <div className="text-center text-zinc-400 dark:text-zinc-500 mt-20">
-                  <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-zinc-100 dark:bg-zinc-800/50 flex items-center justify-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="48"
-                      height="48"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="text-zinc-400 dark:text-zinc-500"
-                    >
-                      <path d="M12 2a10 10 0 1 0 10 10H12V2Z"></path>
-                      <path d="M12 12 2.1 2.1"></path>
-                    </svg>
+                {graphData.nodes.length === 0 && (
+                  <div className="text-center text-zinc-400 dark:text-zinc-500 mt-20">
+                    <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-zinc-100 dark:bg-zinc-800/50 flex items-center justify-center">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="48"
+                        height="48"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="text-zinc-400 dark:text-zinc-500"
+                      >
+                        <path d="M12 2a10 10 0 1 0 10 10H12V2Z"></path>
+                        <path d="M12 12 2.1 2.1"></path>
+                      </svg>
+                    </div>
+                    <p className="text-sm">Mind map will appear here</p>
+                    <p className="text-xs mt-1">
+                      Processing your meeting in real-time
+                    </p>
                   </div>
-                  <p className="text-sm">Mind map will appear here</p>
-                  <p className="text-xs mt-1">
-                    Processing your meeting in real-time
-                  </p>
-                </div>
+                )}
               </div>
             )}
           </div>
