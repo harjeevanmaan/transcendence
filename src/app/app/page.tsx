@@ -256,10 +256,11 @@ export default function AppPage() {
 
   // Send transcript to backend every 15 s while recording (simple throttle)
   const sendToBackend = async (text: string) => {
-    if (text.length < 200) return; // skip tiny payloads
+    if (text.length < 50) return; // skip tiny payloads
     const t0 = performance.now();
     try {
-      const res = await fetch("/api/backend", {
+      const endpoint = process.env.NEXT_PUBLIC_BACKEND_URL || "/api/backend";
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text }),

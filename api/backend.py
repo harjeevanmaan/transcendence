@@ -88,12 +88,25 @@ def build_map(text: str) -> MindMap:
 
 
 class handler(BaseHTTPRequestHandler):
+    def _set_cors(self):
+        # Allow all origins for local development; tighten in prod if needed
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Access-Control-Allow-Methods", "POST, OPTIONS")
+
     def _json(self, code: int, obj):
         payload = json.dumps(obj).encode()
         self.send_response(code)
+        self._set_cors()
         self.send_header("Content-Type", "application/json")
         self.end_headers()
         self.wfile.write(payload)
+
+    # Handle CORS pre-flight
+    def do_OPTIONS(self):
+        self.send_response(204)
+        self._set_cors()
+        self.end_headers()
 
     def do_POST(self):
         # 1️⃣  Grab body (could be 0-bytes)
