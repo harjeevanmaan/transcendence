@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react";
-import ForceGraph2D from "react-force-graph-2d";
+import ForceGraph2D from "react-force-graph";
 
 export interface NodeType {
   id: string;
@@ -30,12 +30,14 @@ const MindMapCanvas = ({ data }: { data: MindMapData }) => {
     }
   }, []);
 
+  const graph = React.useMemo(() => ({ nodes: data.nodes, links: data.edges }), [data]);
+
   return (
     <ForceGraph2D
       ref={fgRef}
-      graphData={data}
+      graphData={graph as any}
       nodeLabel={(n: any) => n.label}
-      nodeCanvasObject={(node: any, ctx, _globalScale) => {
+      nodeCanvasObject={(node: any, ctx: CanvasRenderingContext2D, _gs: number) => {
         const radius = 4 + (node.importance || 2) * 2;
         const gradient = ctx.createRadialGradient(
           node.x,
