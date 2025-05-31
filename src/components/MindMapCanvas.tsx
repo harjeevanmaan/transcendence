@@ -36,21 +36,15 @@ const MindMapCanvas = ({ data }: { data: MindMapData }) => {
       ref={fgRef}
       graphData={graph as any}
       nodeLabel={(n: any) => n.label}
-      nodeCanvasObject={(node: any, ctx: CanvasRenderingContext2D, _gs: number) => {
+      nodeCanvasObject={(node: any, ctx: CanvasRenderingContext2D) => {
+        if (!Number.isFinite(node.x) || !Number.isFinite(node.y)) return; // not yet positioned
         const radius = 4 + (node.importance || 2) * 2;
-        const gradient = ctx.createRadialGradient(
-          node.x,
-          node.y,
-          radius * 0.2,
-          node.x,
-          node.y,
-          radius
-        );
-        gradient.addColorStop(0, "#6366F1"); // indigo-500
-        gradient.addColorStop(1, "#3730A3"); // indigo-800
-        ctx.fillStyle = gradient;
+        const g = ctx.createRadialGradient(node.x, node.y, radius * 0.2, node.x, node.y, radius);
+        g.addColorStop(0, "#6366F1"); // indigo-500
+        g.addColorStop(1, "#3730A3"); // indigo-800
+        ctx.fillStyle = g;
         ctx.beginPath();
-        ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
+        ctx.arc(node.x, node.y, radius, 0, Math.PI * 2, false);
         ctx.fill();
       }}
       linkWidth={(link: any) => link.weight || 1}
