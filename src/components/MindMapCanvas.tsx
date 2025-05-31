@@ -1,5 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
-import ForceGraph2D from 'react-force-graph-2d';
+import ForceGraph2D from "react-force-graph-2d";
+import type ForceGraphInstance from "force-graph";
+
 export interface NodeType {
   id: string;
   label: string;
@@ -20,9 +22,11 @@ export interface MindMapData {
 
 // Renders a basic 2-D force graph. Node size = importance, edge width = weight.
 const MindMapCanvas = ({ data }: { data: MindMapData }) => {
-  const fgRef = useRef<any>();
+  const fgRef = useRef<ForceGraphInstance<NodeType, EdgeType>>();
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 300, h: 300 });
+  const [fitRequested, setFitRequested] = useState(false);
+  const [layoutReady, setLayoutReady] = useState(false);
 
   // ResizeObserver keeps canvas height in sync with its parent at all times
   useEffect(() => {
@@ -42,8 +46,8 @@ const MindMapCanvas = ({ data }: { data: MindMapData }) => {
   // Configure forces only once
   useEffect(() => {
     if (fgRef.current) {
-      fgRef.current.d3Force("charge").strength(-120);
-      fgRef.current.d3Force("center").strength(0.1);
+      fgRef.current.d3Force("charge")?.strength(-120);
+      fgRef.current.d3Force("center")?.strength(0.1);
     }
   }, []);
 
@@ -60,36 +64,103 @@ const MindMapCanvas = ({ data }: { data: MindMapData }) => {
     console.log("[Canvas] size →", size.w, "×", size.h);
   }, [size]);
 
+  // ask for a fresh fit whenever data or canvas size changes
+  useEffect(() => {
+    if (data.nodes.length) {
+      setFitRequested(true);
+      setLayoutReady(false);
+    }
+  }, [data.nodes.length, size.w, size.h]);
+
+  /* ---------- helper palettes ---------- */
+  const colorByImportance = (imp: number = 1) => {
+    return imp >= 5 ? "#4B5563"          // root  – slate-600
+         : imp >= 3 ? "#6B7280"          // topic – gray-500
+                    : "#D1D5DB";         // leaf  – gray-300
+  };
+
+  /* ---------- custom canvas render ---------- */
+  const drawNode = (node: any, ctx: CanvasRenderingContext2D, scale: number) => {
+    const label       = node.label ?? "";
+    const importance  = node.importance ?? 1;
+    const fontPx      = 10 + importance * 2;     // 12-20 px
+    ctx.font          = `${fontPx / scale}px Inter, sans-serif`;
+
+    /* text size + pill outline */
+    const textW       = ctx.measureText(label).width;
+    const pad         = 4 + importance;          // fatter for big nodes
+    const boxW        = textW + pad * 2;
+    const boxH        = fontPx + pad * 2;
+
+    const stroke      = colorByImportance(importance);
+    const grad        = ctx.createLinearGradient(0, pad, 0, boxH - pad);
+    grad.addColorStop(0, "#FFFFFF");
+    grad.addColorStop(1, "#F3F4F6");
+
+    ctx.fillStyle   = grad;
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth     = 1.5;
+
+    /* pill-shaped bg */
+    const x = node.x! - boxW / 2;
+    const y = node.y! - boxH / 2;
+    const r = boxH / 2;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + boxW - r, y);
+    ctx.quadraticCurveTo(x + boxW, y, x + boxW, y + r);
+    ctx.lineTo(x + boxW, y + boxH - r);
+    ctx.quadraticCurveTo(x + boxW, y + boxH, x + boxW - r, y + boxH);
+    ctx.lineTo(x + r, y + boxH);
+    ctx.quadraticCurveTo(x, y + boxH, x, y + boxH - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    /* label */
+    ctx.fillStyle   = stroke;
+    ctx.textAlign   = "center";
+    ctx.textBaseline= "middle";
+    ctx.fillText(label, node.x!, node.y!);
+  };
+
+  /* ---------- pointer area (hit-test) ---------- */
+  const paintPointer = (node: any, colour: string, ctx: any) => {
+    const w = 50 + (node.importance ?? 1) * 10;  // generous hit-box
+    const h = 24 + (node.importance ?? 1) * 4;
+    ctx.fillStyle = colour;
+    ctx.fillRect(node.x! - w / 2, node.y! - h / 2, w, h);
+  };
+
   return (
     <div ref={wrapperRef} className="w-full h-full">
       <ForceGraph2D
         ref={fgRef}
         width={size.w}
         height={size.h}
-        graphData={graph as any}
-        nodeLabel={(n: any) => n.label}
-        nodeCanvasObject={(node: any, ctx: CanvasRenderingContext2D) => {
-          if (!Number.isFinite(node.x) || !Number.isFinite(node.y)) return;
-          const radius = 4 + (node.importance || 2) * 2;
-
-          // circle
-          const g = ctx.createRadialGradient(node.x, node.y, radius * 0.2, node.x, node.y, radius);
-          g.addColorStop(0, "#6366F1");
-          g.addColorStop(1, "#3730A3");
-          ctx.fillStyle = g;
-          ctx.beginPath();
-          ctx.arc(node.x, node.y, radius, 0, Math.PI * 2, false);
-          ctx.fill();
-
-          // label
-          ctx.font = "10px Inter, sans-serif";
-          ctx.fillStyle = "#E0E7FF"; // indigo-100
-          ctx.textAlign = "center";
-          ctx.textBaseline = "top";
-          ctx.fillText(node.label, node.x, node.y + radius + 2);
+        graphData={graph}
+        // ---------- layout ----------
+        dagMode="td"                // top-down
+        dagLevelDistance={150}
+        cooldownTicks={60}          // finish quickly but allow separation
+        enableNodeDrag={false}
+        // ---------- sizing / colour ----------
+        nodeRelSize={4}
+        nodeVal={(n: any) => n.importance ?? 1}
+        linkColor={() => "rgba(0,0,0,0.2)"}
+        // ---------- custom draw ----------
+        nodeCanvasObject={drawNode}
+        nodePointerAreaPaint={paintPointer}
+        style={{ opacity: layoutReady ? 1 : 0, transition: "opacity .4s" }}
+        onEngineStop={() => {
+          if (fitRequested && fgRef.current) {
+            fgRef.current.zoomToFit(400, 40);
+            setFitRequested(false);
+            setLayoutReady(true);
+          }
         }}
-        linkWidth={(link: any) => link.weight || 1}
-        linkColor={() => "#94A3B8"}
       />
     </div>
   );
