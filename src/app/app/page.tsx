@@ -475,7 +475,7 @@ export default function AppPage() {
 
           {/* Right side - Transcription Area (25%) */}
           {(isRecording || graphData.nodes.length > 0) && (
-            <div className="flex-1 ml-6 bg-white dark:bg-zinc-800 rounded-lg shadow-xl overflow-hidden border border-zinc-200 dark:border-zinc-700 flex flex-col">
+            <div className="flex-1 ml-6 min-h-0 bg-white dark:bg-zinc-800 rounded-lg shadow-xl overflow-hidden border border-zinc-200 dark:border-zinc-700 flex flex-col">
               <div className="p-4 bg-indigo-500 text-white flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <Mic className="h-4 w-4" />
