@@ -371,8 +371,12 @@ export default function AppPage() {
       <main className="flex-1 p-6">
         <div className="w-full h-full flex">
           {/* Left side - Mind Map Area (75%) */}
-          <div className="flex-[3] flex flex-col items-center justify-center w-full h-full">
-            <MindMapCanvas data={graphData} />
+          <div className="relative flex-[3] flex flex-col items-center justify-center w-full h-full">
+            {isRecording && graphData.nodes.length > 0 && (
+              <div className="absolute inset-0 pointer-events-none">
+                <MindMapCanvas data={graphData} />
+              </div>
+            )}
             {!isRecording ? (
               <div className="w-full max-w-md bg-white dark:bg-zinc-800 rounded-lg shadow-2xl overflow-hidden border border-zinc-200 dark:border-zinc-700">
                 <div className="p-8 flex flex-col items-center justify-center space-y-4">
