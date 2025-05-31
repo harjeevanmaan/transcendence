@@ -31,6 +31,21 @@ export default function AppPage() {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const transcriptRef = useRef<string>("");
 
+  /* ────────── layout-debug refs & logger ────────── */
+  const mainRef    = useRef<HTMLElement>(null);
+  const mapAreaRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const measure = () => {
+      const mainH = mainRef.current?.getBoundingClientRect().height ?? 0;
+      const mapH  = mapAreaRef.current?.getBoundingClientRect().height ?? 0;
+      console.log("[Layout] main:", mainH, "px  |  map-area:", mapH, "px");
+    };
+    measure();                       // first run
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
+
   // Cleanup function for all timeouts
   useEffect(() => {
     return () => {
@@ -369,10 +384,15 @@ export default function AppPage() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 p-6">
-        <div className="w-full h-full flex">
+      <main ref={mainRef} className="flex flex-1 min-h-0">
+        <div className="w-full h-full flex min-h-0">
           {/* Left side - Mind Map Area (75%) */}
-          <div className="relative flex-[3] flex flex-col items-center justify-center w-full h-full">
+          <div
+            ref={mapAreaRef}
+            className={`relative flex-[3] flex flex-col flex-1 min-h-0 ${
+              graphData.nodes.length === 0 ? "items-center justify-center p-6" : ""
+            }`}
+          >
             {graphData.nodes.length > 0 && (
               <div className="absolute inset-0 pointer-events-none">
                 <MindMapCanvas data={graphData} />

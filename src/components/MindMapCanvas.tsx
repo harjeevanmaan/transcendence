@@ -24,16 +24,19 @@ const MindMapCanvas = ({ data }: { data: MindMapData }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 300, h: 300 });
 
-  // Resize observer to keep canvas bounded to parent div
+  // ResizeObserver keeps canvas height in sync with its parent at all times
   useEffect(() => {
-    const update = () => {
-      if (!wrapperRef.current) return;
-      const { clientWidth, clientHeight } = wrapperRef.current;
-      setSize({ w: clientWidth, h: clientHeight });
-    };
-    update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
+    if (!wrapperRef.current) return;
+    const el = wrapperRef.current;
+
+    const ro = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        setSize({ w: Math.floor(width), h: Math.floor(height) });
+      }
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
   }, []);
 
   // Configure forces only once
@@ -51,6 +54,11 @@ const MindMapCanvas = ({ data }: { data: MindMapData }) => {
       console.log("🎨 rendering graph with", data.nodes.length, "nodes");
     }
   }, [data.nodes.length]);
+
+  // ───── Canvas-size debug ─────
+  useEffect(() => {
+    console.log("[Canvas] size →", size.w, "×", size.h);
+  }, [size]);
 
   return (
     <div ref={wrapperRef} className="w-full h-full">
