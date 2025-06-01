@@ -15,7 +15,7 @@ import type { MindMapData } from "@/components/MindMapCanvas";
 // ───────────────────────────────────────────────────────────────
 // Backend routing – set this to true when you want to hit your
 // local FastAPI/Flask/Whatever running on :5001.
-const USE_LOCAL_BACKEND = true;   // ← flip to true for localhost:5001
+const USE_LOCAL_BACKEND = false;   // ← flip to true for localhost:5001
 const BACKEND_ENDPOINT  = USE_LOCAL_BACKEND
   ? "http://localhost:5001/api/backend"
   : "/api/backend";                // default Next.js route
