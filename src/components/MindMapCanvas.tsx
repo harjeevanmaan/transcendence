@@ -1,9 +1,10 @@
 import React, { useRef, useEffect, useState } from "react";
 import ForceGraph2D from "react-force-graph-2d";
 import type ForceGraphInstance from "force-graph";
+import { forceCollide } from "d3-force";
+import type { NodeObject } from "force-graph";
 
-export interface NodeType {
-  id: string;
+export interface NodeType extends NodeObject {
   label: string;
   importance?: number;
 }
@@ -48,6 +49,14 @@ const MindMapCanvas = ({ data }: { data: MindMapData }) => {
     if (fgRef.current) {
       fgRef.current.d3Force("charge")?.strength(-120);
       fgRef.current.d3Force("center")?.strength(0.1);
+
+      /* ---------- NEW: keep nodes from overlapping ---------- */
+      fgRef.current.d3Force(
+        "collision",
+        forceCollide<NodeType>()
+          .radius((n: any) => 20 + n.label.length * 3)   // rough pill half-width
+          .strength(0.9)
+      );
     }
   }, []);
 
@@ -81,7 +90,10 @@ const MindMapCanvas = ({ data }: { data: MindMapData }) => {
 
   /* ---------- custom canvas render ---------- */
   const drawNode = (node: any, ctx: CanvasRenderingContext2D, scale: number) => {
-    const label       = node.label ?? "";
+    /* shorten very long labels so the pill stays compact */
+    const rawLabel    = node.label ?? "";
+    const label =
+      rawLabel.length > 14 ? rawLabel.slice(0, 12).trimEnd() + "…" : rawLabel;
     const importance  = node.importance ?? 1;
     const fontPx      = 10 + importance * 2;     // 12-20 px
     ctx.font          = `${fontPx / scale}px Inter, sans-serif`;
@@ -124,6 +136,12 @@ const MindMapCanvas = ({ data }: { data: MindMapData }) => {
     ctx.textAlign   = "center";
     ctx.textBaseline= "middle";
     ctx.fillText(label, node.x!, node.y!);
+
+    /* full text on native tooltip */
+    if (!node.__titleSet) {
+      node.__titleSet = true;
+      node.name = rawLabel;               // ForceGraph uses `name` for <title>
+    }
   };
 
   /* ---------- pointer area (hit-test) ---------- */
