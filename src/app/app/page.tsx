@@ -26,26 +26,40 @@ const mergeGraphData = (
   incoming: MindMapData
 ): MindMapData => {
   const nodeMap = new Map(prev.nodes.map((n) => [n.id, n]));
+
   const mergedNodes: NodeType[] = incoming.nodes.map((n) => {
     const existing = nodeMap.get(n.id);
+
+    /* ──────────────── 1️⃣  Already-known node ──────────────── */
     if (existing) {
-      existing.label = n.label;
+      // update mutable fields
+      existing.label      = n.label;
       existing.importance = n.importance;
-      return existing;                // 🔄 keep reference
+
+      // NEW: copy coords & lock them *before* FG sees the data
+      if (existing.x !== undefined && existing.y !== undefined) {
+        existing.fx = existing.x;
+        existing.fy = existing.y;
+      }
+
+      return existing;                // 🔄 keep reference (no re-heat)
     }
-    return { ...n };                  // 🆕 new node
+
+    /* ──────────────── 2️⃣  Brand-new node ─────────────────── */
+    // allow free movement until we freeze after layout
+    return { ...n };
   });
 
-  const edgeKey = (e: EdgeType) => `${e.source}->${e.target}`;
-  const edgeMap = new Map(prev.edges.map((e) => [edgeKey(e), e]));
+  const edgeKey  = (e: EdgeType) => `${e.source}->${e.target}`;
+  const edgeMap  = new Map(prev.edges.map((e) => [edgeKey(e), e]));
   const mergedEdges: EdgeType[] = incoming.edges.map((e) => {
     const existing = edgeMap.get(edgeKey(e));
     if (existing) {
       existing.relation = e.relation;
       existing.weight   = e.weight;
-      return existing;                // 🔄 keep reference
+      return existing;
     }
-    return { ...e };                  // 🆕 new edge
+    return { ...e };
   });
 
   return { nodes: mergedNodes, edges: mergedEdges };
