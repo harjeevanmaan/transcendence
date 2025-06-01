@@ -29,6 +29,9 @@ const MindMapCanvas = ({ data }: { data: MindMapData }) => {
   const [fitRequested, setFitRequested] = useState(false);
   const [layoutReady, setLayoutReady] = useState(false);
 
+  /* ────────── new: track hover ────────── */
+  const [hoverNode, setHoverNode] = useState<NodeType | null>(null);
+
   // ResizeObserver keeps canvas height in sync with its parent at all times
   useEffect(() => {
     if (!wrapperRef.current) return;
@@ -90,28 +93,49 @@ const MindMapCanvas = ({ data }: { data: MindMapData }) => {
 
   /* ---------- custom canvas render ---------- */
   const drawNode = (node: any, ctx: CanvasRenderingContext2D, scale: number) => {
+    /* Skip the very first engine ticks when x / y are still undefined */
+    if (node.x === undefined || node.y === undefined) return;
+
     /* shorten very long labels so the pill stays compact */
     const rawLabel    = node.label ?? "";
     const label =
       rawLabel.length > 14 ? rawLabel.slice(0, 12).trimEnd() + "…" : rawLabel;
     const importance  = node.importance ?? 1;
-    const fontPx      = 10 + importance * 2;     // 12-20 px
+
+    /* Hover: 10 % enlargement */
+    const isHover     = hoverNode && hoverNode.id === node.id;
+    const hoverScale  = isHover ? 1.1 : 1;
+
+    const fontPx      = (10 + importance * 2) * hoverScale;   // 12-22 px
     ctx.font          = `${fontPx / scale}px Inter, sans-serif`;
 
     /* text size + pill outline */
     const textW       = ctx.measureText(label).width;
-    const pad         = 4 + importance;          // fatter for big nodes
+    const pad         = (4 + importance) * hoverScale;
     const boxW        = textW + pad * 2;
     const boxH        = fontPx + pad * 2;
 
     const stroke      = colorByImportance(importance);
-    const grad        = ctx.createLinearGradient(0, pad, 0, boxH - pad);
+
+    /* === Subtle linear gradient (white → light-grey) === */
+    const grad = ctx.createLinearGradient(
+      0,
+      node.y! - boxH / 2 + pad,
+      0,
+      node.y! + boxH / 2 - pad
+    );
     grad.addColorStop(0, "#FFFFFF");
     grad.addColorStop(1, "#F3F4F6");
 
+    ctx.save();                         // isolate shadow settings
     ctx.fillStyle   = grad;
     ctx.strokeStyle = stroke;
-    ctx.lineWidth     = 1.5;
+    ctx.lineWidth   = isHover ? 2.0 : 1.5;
+
+    /* glow intensity scales with importance */
+    ctx.shadowColor = stroke;
+    ctx.shadowBlur  = 4 + importance * 2 * (isHover ? 1.5 : 1);
+    if (isHover) ctx.shadowColor = "#6EE7B7";  // soft teal glow on hover
 
     /* pill-shaped bg */
     const x = node.x! - boxW / 2;
@@ -130,6 +154,7 @@ const MindMapCanvas = ({ data }: { data: MindMapData }) => {
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
+    ctx.restore();                      // remove shadow so text stays crisp
 
     /* label */
     ctx.fillStyle   = stroke;
@@ -183,6 +208,7 @@ const MindMapCanvas = ({ data }: { data: MindMapData }) => {
         // ---------- custom draw ----------
         nodeCanvasObject={drawNode}
         nodePointerAreaPaint={paintPointer}
+        onNodeHover={setHoverNode}
         style={{ opacity: layoutReady ? 1 : 0, transition: "opacity .4s" }}
         onEngineStop={() => {
           if (fitRequested && fgRef.current) {
