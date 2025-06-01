@@ -134,6 +134,18 @@ const MindMapCanvas = ({ data }: { data: MindMapData }) => {
     ctx.fillRect(node.x! - w / 2, node.y! - h / 2, w, h);
   };
 
+  /* ---------- helper: lock every node once layout is done ---------- */
+  const freezeCurrentPositions = () => {
+    const fg = fgRef.current;
+    if (!fg || typeof (fg as any).graphData !== "function") return;
+
+    const { nodes } = (fg as any).graphData();
+    nodes.forEach((n: any) => {
+      n.fx = n.x;
+      n.fy = n.y;
+    });
+  };
+
   return (
     <div ref={wrapperRef} className="w-full h-full">
       <ForceGraph2D
@@ -159,6 +171,9 @@ const MindMapCanvas = ({ data }: { data: MindMapData }) => {
             fgRef.current.zoomToFit(400, 40);
             setFitRequested(false);
             setLayoutReady(true);
+
+            /* 🔒 pin nodes so future data can't shake them */
+            freezeCurrentPositions();
           }
         }}
       />

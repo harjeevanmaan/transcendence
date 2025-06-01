@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Play, Square, Mic } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import type { NodeType, EdgeType } from "@/components/MindMapCanvas";
 
 // ForceGraph uses window; load dynamically to avoid SSR issues.
 const MindMapCanvas = dynamic(() => import("@/components/MindMapCanvas"), {
@@ -18,6 +19,37 @@ const USE_LOCAL_BACKEND = true;   // ← flip to true for localhost:5001
 const BACKEND_ENDPOINT  = USE_LOCAL_BACKEND
   ? "http://localhost:5001/api/backend"
   : "/api/backend";                // default Next.js route
+
+// ✨ 2. utility that re-uses existing objects so their x/y stay intact
+const mergeGraphData = (
+  prev: MindMapData,
+  incoming: MindMapData
+): MindMapData => {
+  const nodeMap = new Map(prev.nodes.map((n) => [n.id, n]));
+  const mergedNodes: NodeType[] = incoming.nodes.map((n) => {
+    const existing = nodeMap.get(n.id);
+    if (existing) {
+      existing.label = n.label;
+      existing.importance = n.importance;
+      return existing;                // 🔄 keep reference
+    }
+    return { ...n };                  // 🆕 new node
+  });
+
+  const edgeKey = (e: EdgeType) => `${e.source}->${e.target}`;
+  const edgeMap = new Map(prev.edges.map((e) => [edgeKey(e), e]));
+  const mergedEdges: EdgeType[] = incoming.edges.map((e) => {
+    const existing = edgeMap.get(edgeKey(e));
+    if (existing) {
+      existing.relation = e.relation;
+      existing.weight   = e.weight;
+      return existing;                // 🔄 keep reference
+    }
+    return { ...e };                  // 🆕 new edge
+  });
+
+  return { nodes: mergedNodes, edges: mergedEdges };
+};
 
 export default function AppPage() {
   const [isRecording, setIsRecording] = useState(false);
@@ -295,7 +327,7 @@ export default function AppPage() {
       data.edges.forEach((e: any) =>
         console.log("edge:", e.source, "--(", e.relation || "", ")→", e.target)
       );
-      setGraphData(data);
+      setGraphData((prev) => mergeGraphData(prev, data));
     } catch (err) {
       console.error("🚨 backend fetch failed", err);
     }
