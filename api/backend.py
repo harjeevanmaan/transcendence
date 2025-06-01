@@ -37,7 +37,7 @@ class MindMap(BaseModel):
 
 # ────────────────── Hard-coded sample mode ─────────────────
 # Flip to False to restore "live" behaviour.
-USE_SAMPLE = True
+USE_SAMPLE = False
 
 # Cache so the expensive OpenAI call happens only once.
 _CACHED_SAMPLE_MAP: "MindMap | None" = None
